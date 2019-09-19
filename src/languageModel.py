@@ -3,14 +3,31 @@ import os
 import numpy as np
 
 def main():
-	training_file_path = 'DATASET/train/' + sys.argv[1] + '.txt'
-	validation_file_path = 'DATASET/validation/' + sys.argv[2] + '.txt'
-	with open(training_file_path) as training_file:
-		train_count, unicounts, bicounts = word_counter(training_file)
-	with open(validation_file_path) as validation_file:
-		# smooth_training(validation_file, train_count, unicounts, bicounts)
-		# interpolation_smoothing(validation_file, train_count, unicounts, bicounts)
-		kneser_ney_smoothing(validation_file, train_count, unicounts, bicounts)
+	if len(sys.argv) == 2:
+		# train mode
+		print('todo')
+	elif len(sys.argv) == 3:
+		# validation mode
+		training_file_path = 'DATASET/train/' + sys.argv[1] + '.txt'
+		validation_file_path = 'DATASET/validation/' + sys.argv[2] + '.txt'
+		print('Using {} model on {} validation set'.format(sys.argv[1], sys.argv[2]))
+		with open(training_file_path) as training_file:
+			train_count, unicounts, bicounts = word_counter(training_file)
+		with open(validation_file_path) as validation_file:
+			# smoothing_parameter_training(validation_file, train_count, unicounts, bicounts)
+			# interpolation_smoothing(validation_file, train_count, unicounts, bicounts)
+			kneser_ney_smoothing(validation_file, train_count, unicounts, bicounts)
+	elif len(sys.argv) == 4:
+		# test mode
+		class1, class2 = int(sys.argv[1]), int(sys.argv[2])
+		filename = ['deceptive', 'truthful']
+		training_file_path1 = 'DATASET/train/' + filename[class1] + '.txt'
+		training_file_path2 = 'DATASET/validation/' + filename[class2] + '.txt'
+		# test_file_path = 'DATASET/test/' + sys.argv[3] + '.txt'
+		test_file_path = sys.argv[3]
+		test(training_file_path1, training_file_path2, test_file_path, class1, class2)
+	else:
+		print('Please input correct files.')
 
 def word_counter(file):
 	unicounts, bicounts = {}, {}
@@ -93,9 +110,11 @@ def kneser_ney_probability(train_count, unicounts, bicounts):
 	return p1, p2
 
 def validation(validation_file, p1, p2, unicounts):
-	pp1,pp2 = 0,0
-	validation_count = 0
+	validation_count, line_count = 0, 0
+	general_pp1, general_pp2 = 0, 0
 	for line in validation_file:
+		line_count += 1
+		pp1,pp2 = 0,0
 		words = line.strip().split(' ')
 		validation_count += 1
 		pp1 += unigram_test(words[0].lower(), unicounts, p1)
@@ -103,7 +122,12 @@ def validation(validation_file, p1, p2, unicounts):
 			validation_count += 1
 			pp1 += unigram_test(words[i].lower(), unicounts, p1)
 			pp2 += bigram_test(words[i - 1].lower(), words[i].lower(), unicounts, p2)
-	return np.exp(- pp1 / validation_count), np.exp(- pp2 / validation_count)
+		general_pp1 += pp1 
+		general_pp2 += pp2
+		pp1 = np.exp(- pp1 / validation_count)
+		pp2 = np.exp(- pp2 / validation_count)
+		print('For line {}, pp1 = {}, pp2 = {}.'.format(line_count, pp1, pp2))
+	return np.exp(- general_pp1 / validation_count), np.exp(- general_pp2 / validation_count)
 
 def unigram_test(word, unicounts, p1):
 	if unicounts.get(word,0) != 0:
@@ -125,7 +149,7 @@ def bigram_test(word1, word2, unicounts, p2):
 		else:
 			return np.log(p2['unk' + '|' + 'unk'])
 
-def smooth_training(validation_file, train_count, unicounts, bicounts):
+def smoothing_parameter_training(validation_file, train_count, unicounts, bicounts):
 	# pick the k/lambda value that minimizes perplexity
 	unip, bip = {}, {}
 	for i in np.linspace(0.01, 0.1, 10):
@@ -150,7 +174,42 @@ def interpolation_smoothing(validation_file, train_count, unicounts, bicounts):
 def kneser_ney_smoothing(validation_file, train_count, unicounts, bicounts):
 	p1, p2 = kneser_ney_probability(train_count, unicounts, bicounts)
 	pp1, pp2 = validation(validation_file, p1, p2, unicounts)
-	print('Using Kneser_Ney Smoothing, pp1 = {}, pp2 = {}.'.format(pp1, pp2))
+	print('In general, pp1 = {}, pp2 = {}.'.format(pp1, pp2))
+
+def test(training_file_path1, training_file_path2, test_file_path, class1, class2):
+	with open(training_file_path1) as training_file1:
+			train_count1, unicounts1, bicounts1 = word_counter(training_file1)
+	with open(training_file_path2) as training_file2:
+			train_count2, unicounts2, bicounts2 = word_counter(training_file2)
+	with open(test_file_path) as test_file:
+		p11, p12 = kneser_ney_probability(train_count1, unicounts1, bicounts1)
+		p21, p22 = kneser_ney_probability(train_count2, unicounts2, bicounts2)
+		prediction(test_file, class1, class2, p11, p12, p21, p22, unicounts1, unicounts2)
+
+def prediction(test_file, class1, class2, p11, p12, p21, p22, unicounts1, unicounts2):
+	line_count, test_word_count = 0, 0
+	print('Id, Prediction')
+	for line in test_file:
+		pp11, pp12, pp21, pp22 = 0, 0, 0, 0
+		words = line.strip().split(' ')
+		test_word_count += 1
+		pp11 += unigram_test(words[0].lower(), unicounts1, p11)
+		pp21 += unigram_test(words[0].lower(), unicounts2, p21)
+		for i in range(1, len(words)):
+			test_word_count += 1
+			pp11 += unigram_test(words[i].lower(), unicounts1, p11)
+			pp21 += unigram_test(words[i].lower(), unicounts2, p21)
+			pp12 += bigram_test(words[i - 1].lower(), words[i].lower(), unicounts1, p12)
+			pp22 += bigram_test(words[i - 1].lower(), words[i].lower(), unicounts2, p22)
+		pp11 = np.exp(- pp11 / test_word_count)
+		pp21 = np.exp(- pp21 / test_word_count)
+		if pp12 <= pp22:
+			pred = class1
+		else: 
+			pred = class2
+		print('For line {}: \npp11 = {:.2f}, pp21 = {:.2f}\npp12 = {:.2f}, pp22 = {:.2f}'.format(line_count, pp11, pp21, pp12, pp22))
+		print('{}, {}'.format(line_count, pred))
+		line_count += 1
 
 if __name__ == '__main__':
    main()
