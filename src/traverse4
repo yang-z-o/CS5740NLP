@@ -1,0 +1,8 @@
+#!/bin/bash
+
+(
+python3 languageModel.py truthful truthful;
+python3 languageModel.py truthful deceptive;
+python3 languageModel.py deceptive deceptive;
+python3 languageModel.py deceptive truthful;
+) >> output.txt
