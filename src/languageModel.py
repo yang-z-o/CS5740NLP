@@ -205,7 +205,7 @@ def prediction(test_file, class1, class2, y, p11, p12, p21, p22, unicounts1, uni
 			pp22 += bigram_test(words[i - 1].lower(), words[i].lower(), unicounts2, p22)
 		pp11 = np.exp(- pp11 / test_word_count)
 		pp21 = np.exp(- pp21 / test_word_count)
-		for k in np.linspace(0, 10, 11):
+		for k in np.linspace(0, 2, 21):
 			if k * pp11 + (1 - k) * pp12 <= k * pp21 + (1 - k) * pp22:
 				pred = class1
 			else: 
@@ -216,8 +216,8 @@ def prediction(test_file, class1, class2, y, p11, p12, p21, p22, unicounts1, uni
 				accuracy_count[k] = accuracy_count.get(k, 0) + 1
 		line_count += 1
 	print('class1:{}, class2:{}, y:{}\nk, accuracy'.format(class1, class2, y))
-	for k in np.linspace(0, 1, 11):
-		print(k, float(accuracy_count[k]) / line_count)
+	for k in np.linspace(0, 2, 21):
+		print('{:.1f}, {}'.format(k, float(accuracy_count[k]) / line_count))
 
 if __name__ == '__main__':
    main()
