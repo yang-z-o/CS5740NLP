@@ -7,7 +7,7 @@ def main():
 		# train mode
 		print('todo')
 	elif len(sys.argv) == 3:
-		# validation mode
+		# validation mode - training smoothing method
 		training_file_path = 'DATASET/train/' + sys.argv[1] + '.txt'
 		validation_file_path = 'DATASET/validation/' + sys.argv[2] + '.txt'
 		print('Using {} model on {} validation set'.format(sys.argv[1], sys.argv[2]))
@@ -18,14 +18,15 @@ def main():
 			# interpolation_smoothing(validation_file, train_count, unicounts, bicounts)
 			kneser_ney_smoothing(validation_file, train_count, unicounts, bicounts)
 	elif len(sys.argv) == 4:
-		# test mode
-		class1, class2 = int(sys.argv[1]), int(sys.argv[2])
+		# validation mode - training accuracy
+		class1, class2, y = map(int, sys.argv[1:4])
 		filename = ['deceptive', 'truthful']
 		training_file_path1 = 'DATASET/train/' + filename[class1] + '.txt'
-		training_file_path2 = 'DATASET/validation/' + filename[class2] + '.txt'
+		training_file_path2 = 'DATASET/train/' + filename[class2] + '.txt'
 		# test_file_path = 'DATASET/test/' + sys.argv[3] + '.txt'
-		test_file_path = sys.argv[3]
-		test(training_file_path1, training_file_path2, test_file_path, class1, class2)
+		# test_file_path = sys.argv[3]
+		test_file_path = 'DATASET/validation/' + filename[y] + '.txt'
+		test(training_file_path1, training_file_path2, test_file_path, class1, class2, y)
 	else:
 		print('Please input correct files.')
 
@@ -176,7 +177,7 @@ def kneser_ney_smoothing(validation_file, train_count, unicounts, bicounts):
 	pp1, pp2 = validation(validation_file, p1, p2, unicounts)
 	print('In general, pp1 = {}, pp2 = {}.'.format(pp1, pp2))
 
-def test(training_file_path1, training_file_path2, test_file_path, class1, class2):
+def test(training_file_path1, training_file_path2, test_file_path, class1, class2, y):
 	with open(training_file_path1) as training_file1:
 			train_count1, unicounts1, bicounts1 = word_counter(training_file1)
 	with open(training_file_path2) as training_file2:
@@ -184,11 +185,12 @@ def test(training_file_path1, training_file_path2, test_file_path, class1, class
 	with open(test_file_path) as test_file:
 		p11, p12 = kneser_ney_probability(train_count1, unicounts1, bicounts1)
 		p21, p22 = kneser_ney_probability(train_count2, unicounts2, bicounts2)
-		prediction(test_file, class1, class2, p11, p12, p21, p22, unicounts1, unicounts2)
+		prediction(test_file, class1, class2, y, p11, p12, p21, p22, unicounts1, unicounts2)
 
-def prediction(test_file, class1, class2, p11, p12, p21, p22, unicounts1, unicounts2):
+def prediction(test_file, class1, class2, y, p11, p12, p21, p22, unicounts1, unicounts2):
 	line_count, test_word_count = 0, 0
-	print('Id, Prediction')
+	accuracy_count = {}
+	# print('Id, Prediction')
 	for line in test_file:
 		pp11, pp12, pp21, pp22 = 0, 0, 0, 0
 		words = line.strip().split(' ')
@@ -203,13 +205,19 @@ def prediction(test_file, class1, class2, p11, p12, p21, p22, unicounts1, unicou
 			pp22 += bigram_test(words[i - 1].lower(), words[i].lower(), unicounts2, p22)
 		pp11 = np.exp(- pp11 / test_word_count)
 		pp21 = np.exp(- pp21 / test_word_count)
-		if pp12 <= pp22:
-			pred = class1
-		else: 
-			pred = class2
-		print('For line {}: \npp11 = {:.2f}, pp21 = {:.2f}\npp12 = {:.2f}, pp22 = {:.2f}'.format(line_count, pp11, pp21, pp12, pp22))
-		print('{}, {}'.format(line_count, pred))
+		for k in np.linspace(0, 10, 11):
+			if k * pp11 + (1 - k) * pp12 <= k * pp21 + (1 - k) * pp22:
+				pred = class1
+			else: 
+				pred = class2
+			# print('For line {}: \npp11 = {:.2f}, pp21 = {:.2f}\npp12 = {:.2f}, pp22 = {:.2f}'.format(line_count, pp11, pp21, pp12, pp22))
+			# print('{}, {}'.format(line_count, pred))
+			if pred == y:
+				accuracy_count[k] = accuracy_count.get(k, 0) + 1
 		line_count += 1
+	print('class1:{}, class2:{}, y:{}\nk, accuracy'.format(class1, class2, y))
+	for k in np.linspace(0, 1, 11):
+		print(k, float(accuracy_count[k]) / line_count)
 
 if __name__ == '__main__':
    main()
