@@ -48,9 +48,12 @@ def word_counter(file):
 		train_count += 1
 		unigram_unk(words[0].lower(), seen_words, unicounts)
 		for i in range(1, len(words)):
-			train_count += 1
-			unigram_unk(words[i].lower(), seen_words, unicounts)
-			bigram_unk(words[i - 1].lower(), words[i].lower(), unicounts, bicounts)
+			if words[i] != '':
+				train_count += 1
+				unigram_unk(words[i].lower(), seen_words, unicounts)
+				bigram_unk(words[i - 1].lower(), words[i].lower(), unicounts, bicounts)
+			else:
+				i += 1
 	return train_count, unicounts, bicounts
 
 def unigram_unk(word, seen_words, unicounts):
@@ -128,9 +131,12 @@ def validation(validation_file, p1, p2, unicounts):
 		validation_count += 1
 		pp1 += unigram_test(words[0].lower(), unicounts, p1)
 		for i in range(1, len(words)):
-			validation_count += 1
-			pp1 += unigram_test(words[i].lower(), unicounts, p1)
-			pp2 += bigram_test(words[i - 1].lower(), words[i].lower(), unicounts, p2)
+			if words[i] != '':
+				validation_count += 1
+				pp1 += unigram_test(words[i].lower(), unicounts, p1)
+				pp2 += bigram_test(words[i - 1].lower(), words[i].lower(), unicounts, p2)
+			else:
+				i += 1
 		general_pp1 += pp1 
 		general_pp2 += pp2
 		pp1 = np.exp(- pp1 / validation_count)
@@ -236,11 +242,14 @@ def calculate_perplexity(line, p11, p12, p21, p22, unicounts1, unicounts2):
 	pp11 += unigram_test(words[0].lower(), unicounts1, p11)
 	pp21 += unigram_test(words[0].lower(), unicounts2, p21)
 	for i in range(1, len(words)):
-		test_word_count += 1
-		pp11 += unigram_test(words[i].lower(), unicounts1, p11)
-		pp21 += unigram_test(words[i].lower(), unicounts2, p21)
-		pp12 += bigram_test(words[i - 1].lower(), words[i].lower(), unicounts1, p12)
-		pp22 += bigram_test(words[i - 1].lower(), words[i].lower(), unicounts2, p22)
+		if words[i] != '':
+			test_word_count += 1
+			pp11 += unigram_test(words[i].lower(), unicounts1, p11)
+			pp21 += unigram_test(words[i].lower(), unicounts2, p21)
+			pp12 += bigram_test(words[i - 1].lower(), words[i].lower(), unicounts1, p12)
+			pp22 += bigram_test(words[i - 1].lower(), words[i].lower(), unicounts2, p22)
+		else:
+			i += 1
 	pp11 = np.exp(- pp11 / test_word_count)
 	pp21 = np.exp(- pp21 / test_word_count)
 	pp12 = np.exp(- pp12 / test_word_count)
