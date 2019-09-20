@@ -17,16 +17,17 @@ def main():
 			# smoothing_parameter_training(validation_file, train_count, unicounts, bicounts)
 			# interpolation_smoothing(validation_file, train_count, unicounts, bicounts)
 			kneser_ney_smoothing(validation_file, train_count, unicounts, bicounts)
-	elif len(sys.argv) == 4:
+	elif len(sys.argv) == 5:
 		# validation mode - training accuracy
-		class1, class2, y = map(int, sys.argv[1:4])
+		class1, class2, y1, y2 = map(int, sys.argv[1:5])
 		filename = ['deceptive', 'truthful']
 		training_file_path1 = 'DATASET/train/' + filename[class1] + '.txt'
 		training_file_path2 = 'DATASET/train/' + filename[class2] + '.txt'
 		# test_file_path = 'DATASET/test/' + sys.argv[3] + '.txt'
 		# test_file_path = sys.argv[3]
-		test_file_path = 'DATASET/validation/' + filename[y] + '.txt'
-		test(training_file_path1, training_file_path2, test_file_path, class1, class2, y)
+		test_file_path1 = 'DATASET/validation/' + filename[y1] + '.txt'
+		test_file_path2 = 'DATASET/validation/' + filename[y2] + '.txt'
+		test(training_file_path1, training_file_path2, test_file_path1, test_file_path2, class1, class2, y1, y2)
 	else:
 		print('Please input correct files.')
 
@@ -177,19 +178,27 @@ def kneser_ney_smoothing(validation_file, train_count, unicounts, bicounts):
 	pp1, pp2 = validation(validation_file, p1, p2, unicounts)
 	print('In general, pp1 = {}, pp2 = {}.'.format(pp1, pp2))
 
-def test(training_file_path1, training_file_path2, test_file_path, class1, class2, y):
+def test(training_file_path1, training_file_path2, test_file_path1, test_file_path2, class1, class2, y1, y2):
 	with open(training_file_path1) as training_file1:
-			train_count1, unicounts1, bicounts1 = word_counter(training_file1)
-	with open(training_file_path2) as training_file2:
-			train_count2, unicounts2, bicounts2 = word_counter(training_file2)
-	with open(test_file_path) as test_file:
+		train_count1, unicounts1, bicounts1 = word_counter(training_file1)
 		p11, p12 = kneser_ney_probability(train_count1, unicounts1, bicounts1)
+	with open(training_file_path2) as training_file2:
+		train_count2, unicounts2, bicounts2 = word_counter(training_file2)
 		p21, p22 = kneser_ney_probability(train_count2, unicounts2, bicounts2)
-		prediction(test_file, class1, class2, y, p11, p12, p21, p22, unicounts1, unicounts2)
+	with open(test_file_path1) as test_file1:
+		acc1 = prediction(test_file1, class1, class2, y1, p11, p12, p21, p22, unicounts1, unicounts2)
+	with open(test_file_path2) as test_file2:
+		acc2 = prediction(test_file2, class1, class2, y2, p11, p12, p21, p22, unicounts1, unicounts2)
+	acc_rate = {}
+	for r in np.linspace(0.96, 0.98, 11):
+		acc_rate[r] = acc1.get(r, 0) * 0.5 + acc2.get(r, 0) * 0.5
+		print('{:.3f}, {}'.format(r, acc_rate[r]))
+	r_max = max(acc_rate.keys(), key=(lambda k: acc_rate[k]))
+	print('The rate that maximizes accuracy is {}: {} %'.format(r_max, acc_rate[r_max] * 100))
 
 def prediction(test_file, class1, class2, y, p11, p12, p21, p22, unicounts1, unicounts2):
 	line_count, test_word_count = 0, 0
-	accuracy_count = {}
+	accuracy_count, accuracy = {}, {}
 	# print('Id, Prediction')
 	for line in test_file:
 		pp11, pp12, pp21, pp22 = 0, 0, 0, 0
@@ -205,19 +214,22 @@ def prediction(test_file, class1, class2, y, p11, p12, p21, p22, unicounts1, uni
 			pp22 += bigram_test(words[i - 1].lower(), words[i].lower(), unicounts2, p22)
 		pp11 = np.exp(- pp11 / test_word_count)
 		pp21 = np.exp(- pp21 / test_word_count)
-		for k in np.linspace(0, 2, 21):
-			if k * pp11 + (1 - k) * pp12 <= k * pp21 + (1 - k) * pp22:
+		k = 2
+		for r in np.linspace(0.96, 0.98, 11):
+			if r * (k * pp11 + (1 - k) * pp12) <= k * pp21 + (1 - k) * pp22:
 				pred = class1
 			else: 
 				pred = class2
 			# print('For line {}: \npp11 = {:.2f}, pp21 = {:.2f}\npp12 = {:.2f}, pp22 = {:.2f}'.format(line_count, pp11, pp21, pp12, pp22))
 			# print('{}, {}'.format(line_count, pred))
 			if pred == y:
-				accuracy_count[k] = accuracy_count.get(k, 0) + 1
+				accuracy_count[r] = accuracy_count.get(r, 0) + 1
 		line_count += 1
-	print('class1:{}, class2:{}, y:{}\nk, accuracy'.format(class1, class2, y))
-	for k in np.linspace(0, 2, 21):
-		print('{:.1f}, {}'.format(k, float(accuracy_count[k]) / line_count))
+	# print('class1:{}, class2:{}, y:{}\nr, accuracy'.format(class1, class2, y))
+	for r in np.linspace(0.96, 0.98, 11):
+		# print('{:.2f}, {}'.format(r, float(accuracy_count.get(r, 0)) / line_count))
+		accuracy[r] = float(accuracy_count.get(r, 0)) / line_count
+	return accuracy
 
 if __name__ == '__main__':
    main()
