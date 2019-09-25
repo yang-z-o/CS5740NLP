@@ -1,0 +1,23 @@
+r = 0.80, acc_r = 75.00%
+r = 0.81, acc_r = 76.56%
+r = 0.82, acc_r = 77.73%
+r = 0.83, acc_r = 79.69%
+r = 0.84, acc_r = 80.86%
+r = 0.85, acc_r = 81.25%
+r = 0.86, acc_r = 81.64%
+r = 0.87, acc_r = 81.64%
+r = 0.88, acc_r = 82.42%
+r = 0.89, acc_r = 82.03%
+r = 0.90, acc_r = 83.98%
+r = 0.91, acc_r = 82.42%
+r = 0.92, acc_r = 82.42%
+r = 0.93, acc_r = 80.86%
+r = 0.94, acc_r = 81.25%
+r = 0.95, acc_r = 80.47%
+r = 0.96, acc_r = 79.69%
+r = 0.97, acc_r = 78.91%
+r = 0.98, acc_r = 77.73%
+r = 0.99, acc_r = 77.73%
+r = 1.00, acc_r = 76.56%
+k = 0.10, the rate that maximizes accuracy is 0.90: 83.98%
+The k that maximizes accuracy is 0.10: 83.98%

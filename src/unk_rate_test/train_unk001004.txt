@@ -1,0 +1,45 @@
+k = 0.10, the rate that maximizes accuracy is 0.87: 88.67%
+k = 0.20, the rate that maximizes accuracy is 0.87: 89.06%
+k = 0.30, the rate that maximizes accuracy is 0.87: 89.84%
+k = 0.40, the rate that maximizes accuracy is 0.87: 90.62%
+k = 0.50, the rate that maximizes accuracy is 0.87: 90.23%
+k = 0.60, the rate that maximizes accuracy is 0.87: 89.06%
+k = 0.70, the rate that maximizes accuracy is 0.87: 89.45%
+k = 0.80, the rate that maximizes accuracy is 0.87: 89.06%
+k = 0.90, the rate that maximizes accuracy is 0.87: 88.67%
+k = 1.00, the rate that maximizes accuracy is 0.87: 88.67%
+The k that maximizes accuracy is 0.40: 90.62%
+k = 0.10, the rate that maximizes accuracy is 0.87: 87.89%
+k = 0.20, the rate that maximizes accuracy is 0.87: 89.84%
+k = 0.30, the rate that maximizes accuracy is 0.87: 89.45%
+k = 0.40, the rate that maximizes accuracy is 0.87: 89.45%
+k = 0.50, the rate that maximizes accuracy is 0.87: 89.06%
+k = 0.60, the rate that maximizes accuracy is 0.87: 89.45%
+k = 0.70, the rate that maximizes accuracy is 0.87: 88.67%
+k = 0.80, the rate that maximizes accuracy is 0.87: 89.45%
+k = 0.90, the rate that maximizes accuracy is 0.87: 87.50%
+k = 1.00, the rate that maximizes accuracy is 0.87: 87.50%
+The k that maximizes accuracy is 0.20: 89.84%
+k = 0.10, the rate that maximizes accuracy is 0.87: 87.89%
+k = 0.20, the rate that maximizes accuracy is 0.87: 89.45%
+k = 0.30, the rate that maximizes accuracy is 0.87: 89.45%
+k = 0.40, the rate that maximizes accuracy is 0.87: 89.84%
+k = 0.50, the rate that maximizes accuracy is 0.87: 89.06%
+k = 0.60, the rate that maximizes accuracy is 0.87: 88.67%
+k = 0.70, the rate that maximizes accuracy is 0.87: 88.67%
+k = 0.80, the rate that maximizes accuracy is 0.87: 88.67%
+k = 0.90, the rate that maximizes accuracy is 0.87: 87.89%
+k = 1.00, the rate that maximizes accuracy is 0.87: 87.50%
+The k that maximizes accuracy is 0.40: 89.84%
+k = 0.10, the rate that maximizes accuracy is 0.87: 87.11%
+k = 0.20, the rate that maximizes accuracy is 0.87: 88.67%
+k = 0.30, the rate that maximizes accuracy is 0.87: 89.45%
+k = 0.40, the rate that maximizes accuracy is 0.87: 89.06%
+k = 0.50, the rate that maximizes accuracy is 0.87: 88.67%
+k = 0.60, the rate that maximizes accuracy is 0.87: 88.67%
+k = 0.70, the rate that maximizes accuracy is 0.87: 88.28%
+k = 0.80, the rate that maximizes accuracy is 0.87: 88.28%
+k = 0.90, the rate that maximizes accuracy is 0.87: 86.72%
+k = 1.00, the rate that maximizes accuracy is 0.87: 86.72%
+The k that maximizes accuracy is 0.30: 89.45%
+The rate of unkown words that maximizes accuracy is 0.001000: 90.625000%

@@ -21,39 +21,44 @@ def main():
 
 
 def k_lambda_training(training_file_path1, training_file_path2, validation_file_path1, validation_file_path2, class1, class2, y1, y2):
-	k_range = np.linspace(0.01, 0.1, 10)
-	lambd_range = np.linspace(0, 1, 11)
-	r_range = np.linspace(0.8, 1.0, 21)
-	acc_k, acc_lambd, acc_r = {}, {}, {}	
-	for k in k_range:
-	#for lambd in lambd_range:
-		# train language models on each training file
-		with open(training_file_path1) as training_file1:
-			train_count1, unicounts1, bicounts1 = word_counter(training_file1)
-			p11, p12 = add_k_probability(train_count1, unicounts1, bicounts1, k)
-			#p11, p12 = interpolation_probability(train_count1, unicounts1, bicounts1, lambd)
-		with open(training_file_path2) as training_file2:
-			train_count2, unicounts2, bicounts2 = word_counter(training_file2)
-			p21, p22 = add_k_probability(train_count2, unicounts2, bicounts2, k)
-			#p21, p22 = interpolation_probability(train_count2, unicounts2, bicounts2, lambd)
-		# use two bigrams on each validation file
-		with open(validation_file_path1) as validation_file1:
-			acc1 = accuracy(validation_file1, class1, class2, y1, p11, p12, p21, p22, unicounts1, unicounts2, r_range)
-		with open(validation_file_path2) as validation_file2:
-			acc2 = accuracy(validation_file2, class1, class2, y2, p11, p12, p21, p22, unicounts1, unicounts2, r_range)
-		# for each rate r, compute its accuracy
-		for r in r_range:
-			acc_r[r] = acc1.get(r, 0) * 0.5 + acc2.get(r, 0) * 0.5
-			print('r = {:.2f}, acc_r = {:.2f}%'.format(r, acc_r[r] * 100))
-		r_max = max(acc_r.keys(), key=(lambda k: acc_r[k]))
-		print('k = {:.2f}, the rate that maximizes accuracy is {:.2f}: {:.2f}%'.format(k, r_max, acc_r[r_max] * 100))
-		# print('lambda = {:.2f}, the rate that maximizes accuracy is {:.2f}: {:.2f}%'.format(lambd, r_max, acc_r[r_max] * 100))
-		acc_k[k] = acc_r[r_max] * 100
-		#acc_lambd[lambd] = acc_r[r_max] * 100
-	k_max = max(acc_k.keys(), key=(lambda k: acc_k[k]))
-	print('The k that maximizes accuracy is {:.2f}: {:.2f}%'.format(k_max, acc_k[k_max]))
-	#lambd_max = max(acc_lambd.keys(), key=(lambda k: acc_lambd[k]))
-	#print('The lambda that maximizes accuracy is {:.2f}: {:.2f}%'.format(lambd_max, acc_lambd[lambd_max]))
+	unk_range = np.linspace(0.001, 0.004, 4)
+	acc_unk = {}
+	for unk_rate in unk_range:
+		k_range = np.linspace(0.1, 1, 10)
+		#lambd_range = np.linspace(0, 1, 11)
+		r_range = np.linspace(0.87, 0.87, 1)
+		acc_k, acc_lambd, acc_r = {}, {}, {}	
+		for k in k_range:
+		#for lambd in lambd_range:
+			# train language models on each training file
+			with open(training_file_path1) as training_file1:
+				train_count1, unicounts1, bicounts1 = word_counter(training_file1, unk_rate)
+				p11, p12 = add_k_probability(train_count1, unicounts1, bicounts1, k)
+				#p11, p12 = interpolation_probability(train_count1, unicounts1, bicounts1, lambd)
+			with open(training_file_path2) as training_file2:
+				train_count2, unicounts2, bicounts2 = word_counter(training_file2, unk_rate)
+				p21, p22 = add_k_probability(train_count2, unicounts2, bicounts2, k)
+				#p21, p22 = interpolation_probability(train_count2, unicounts2, bicounts2, lambd)
+			# use two bigrams on each validation file
+			with open(validation_file_path1) as validation_file1:
+				acc1 = accuracy(validation_file1, class1, class2, y1, p11, p12, p21, p22, unicounts1, unicounts2, r_range)
+			with open(validation_file_path2) as validation_file2:
+				acc2 = accuracy(validation_file2, class1, class2, y2, p11, p12, p21, p22, unicounts1, unicounts2, r_range)
+			# for each rate r, compute its accuracy
+			for r in r_range:
+				acc_r[r] = acc1.get(r, 0) * 0.5 + acc2.get(r, 0) * 0.5
+			r_max = max(acc_r.keys(), key=(lambda k: acc_r[k]))
+			print('k = {:.2f}, the rate that maximizes accuracy is {:.2f}: {:.2f}%'.format(k, r_max, acc_r[r_max] * 100))
+			# print('lambda = {:.2f}, the rate that maximizes accuracy is {:.2f}: {:.2f}%'.format(lambd, r_max, acc_r[r_max] * 100))
+			acc_k[k] = acc_r[r_max] * 100
+			#acc_lambd[lambd] = acc_r[r_max] * 100
+		k_max = max(acc_k.keys(), key=(lambda k: acc_k[k]))
+		print('The k that maximizes accuracy is {:.2f}: {:.2f}%'.format(k_max, acc_k[k_max]))
+		#lambd_max = max(acc_lambd.keys(), key=(lambda k: acc_lambd[k]))
+		#print('The lambda that maximizes accuracy is {:.2f}: {:.2f}%'.format(lambd_max, acc_lambd[lambd_max]))
+		acc_unk[unk_rate] = acc_k[k_max]
+	unk_max = max(acc_unk.keys(), key=(lambda k: acc_unk[k]))
+	print('The rate of unkown words that maximizes accuracy is {:2f}: {:2f}%'.format(unk_max, acc_unk[unk_max]))
 
 def kn_training(training_file_path1, training_file_path2, validation_file_path1, validation_file_path2, class1, class2, y1, y2):
 	r_range = np.linspace(0.8, 1.0, 21)
@@ -77,16 +82,15 @@ def kn_training(training_file_path1, training_file_path2, validation_file_path1,
 	print('The r that maximizes accuracy is {:.2f}: {:.2f}%'.format(r_max, acc_r[r_max] * 100))
 
 def test(training_file_path1, training_file_path2, test_file_path):
-	k = 0.09
-	r = 0.95
+	unk_rate = 0.0001
+	k = 0.8
+	r = 0.85
 	# train language models on each training file
 	with open(training_file_path1) as training_file1:
-		train_count1, unicounts1, bicounts1 = word_counter(training_file1)
-		print(train_count1, len(unicounts1), unicounts1['unk'])
+		train_count1, unicounts1, bicounts1 = word_counter(training_file1, unk_rate)
 		p11, p12 = add_k_probability(train_count1, unicounts1, bicounts1, k)
 	with open(training_file_path2) as training_file2:
-		train_count2, unicounts2, bicounts2 = word_counter(training_file2)
-		print(train_count2, len(unicounts2), unicounts2['unk'])
+		train_count2, unicounts2, bicounts2 = word_counter(training_file2, unk_rate)
 		p21, p22 = add_k_probability(train_count2, unicounts2, bicounts2, k)
 	# use two bigrams on test file
 	with open(test_file_path) as test_file:
@@ -108,7 +112,7 @@ def prediction(test_file, p11, p12, p21, p22, unicounts1, unicounts2, r):
 			filewriter.writerow([line_count, pred])
 			line_count += 1
 
-def word_counter(file):
+def word_counter(file, unk_rate):
 	train_count = 0
 	bag_of_words, unicounts, bicounts = {}, {}, {}
 	unk = set()
@@ -119,7 +123,7 @@ def word_counter(file):
 			bag_of_words[word.lower()] = bag_of_words.get(word.lower(), 0) + 1
 	words = [(word,cnt) for word,cnt in bag_of_words.items()]
 	sorted_words = sorted(words, key=lambda x: x[1])
-	for i in range(round(0.02 * len(bag_of_words))):
+	for i in range(int(round(unk_rate * len(bag_of_words)))):
 		unk.add(sorted_words[i][0])
 	file.seek(0)
 	# second loop, count include unk

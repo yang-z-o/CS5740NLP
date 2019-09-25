@@ -1,0 +1,12 @@
+k = 0.10, the rate that maximizes accuracy is 0.90: 87.11%
+k = 0.20, the rate that maximizes accuracy is 0.88: 88.28%
+k = 0.30, the rate that maximizes accuracy is 0.88: 89.06%
+k = 0.40, the rate that maximizes accuracy is 0.87: 88.67%
+k = 0.50, the rate that maximizes accuracy is 0.86: 88.67%
+k = 0.60, the rate that maximizes accuracy is 0.85: 89.06%
+k = 0.70, the rate that maximizes accuracy is 0.86: 88.67%
+k = 0.80, the rate that maximizes accuracy is 0.84: 89.06%
+k = 0.90, the rate that maximizes accuracy is 0.83: 88.67%
+k = 1.00, the rate that maximizes accuracy is 0.83: 89.06%
+The k that maximizes accuracy is 0.30: 89.06%
+The rate of unkown words that maximizes accuracy is 0.005000: 89.062500%
