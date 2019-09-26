@@ -1,1 +1,0 @@
-Using Kneser_Ney Smoothing, pp1 = 294.967136456961, pp2 = inf.

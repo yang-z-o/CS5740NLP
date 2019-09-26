@@ -1,0 +1,9 @@
+X shape is (1600, 9595) y shape is (1280,)
+n = 1: err rate on validation is 96 / 256, 0.38
+X shape is (1600, 90543) y shape is (1280,)
+n = 2: err rate on validation is 52 / 256, 0.20
+X shape is (1600, 257521) y shape is (1280,)
+n = 3: err rate on validation is 42 / 256, 0.16
+X shape is (1600, 468807) y shape is (1280,)
+n = 4: err rate on validation is 37 / 256, 0.14
+X shape is (1600, 695555) y shape is (1280,)
