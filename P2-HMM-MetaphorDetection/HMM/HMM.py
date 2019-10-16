@@ -19,7 +19,7 @@ def main():
 
     # select unknown words
     bow= {}
-    unk_num = 100
+    unk_num = int(sys.argv[2])
     unk = set()
     for i in range(len(word)):
         for j in range(len(word[i])):
@@ -42,10 +42,10 @@ def main():
 
             add_count(unigram, key)
             if md[i][j] is 1:
-                cnt_0 += 1
+                cnt_1 += 1
                 add_count(md1_count, key)
             else:
-                cnt_1 += 1
+                cnt_0 += 1
                 add_count(md0_count, key)
 
     # transition probability
@@ -72,9 +72,9 @@ def main():
                         count_00 += 1
     ps0 = count_s0 / (count_s0 + count_s1)
     ps1 = 1 - ps0
-    p00 = count_00 / (count_00 + count_01)
+    p00 = count_00 / cnt_0
     p01 = 1 - p00
-    p10 = count_10 / (count_10 + count_11)
+    p10 = count_10 / cnt_1
     p11 = 1 - p10
 
 
