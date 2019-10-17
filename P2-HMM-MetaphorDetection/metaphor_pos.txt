@@ -1,0 +1,3 @@
+POS tags that have been tagged as metaphor in training set are 11: {'NOUN', 'DET', 'VERB', 'PRON', 'ADV', 'ADJ', 'ADP', 'PUNCT', 'PROPN', 'NUM', 'PART'} 
+All 15 POS tags are: {'SYM', 'NOUN', 'DET', 'VERB', 'ADV', 'PRON', 'ADJ', 'PROPN', 'ADP', 'CCONJ', 'X', 'PUNCT', 'INTJ', 'NUM', 'PART'}
+POS tags that haven't been tagged as metaphor in training set are 4: {'SYM', 'INTJ', 'X', 'CCONJ'}

@@ -46,6 +46,9 @@ for i in range(total_examples):
         num_correct += 1
     confusion_matrix[predictions[i], gold_labels[i]] += 1
 
+# print(confusion_matrix)
+# if np.sum(confusion_matrix[1]) is 0, our predictions are all 0
+
 assert(num_correct == confusion_matrix[0, 0] + confusion_matrix[1, 1])
 accuracy = 100 * num_correct / total_examples
 precision = 100 * confusion_matrix[1, 1] / np.sum(confusion_matrix[1])
