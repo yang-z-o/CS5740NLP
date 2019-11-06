@@ -1,0 +1,12 @@
+Fetching data
+Fetched and indexed data
+Vectorized data
+Training for 1 epochs
+Training started for epoch 1
+Training completed for epoch 1
+Training accuracy for epoch 1: 0.4
+Training time for this epoch: 0.014872074127197266
+Validation started for epoch 1
+Validation completed for epoch 1
+Validation accuracy for epoch 1: 1.0
+Validation time for this epoch: 0.0065460205078125

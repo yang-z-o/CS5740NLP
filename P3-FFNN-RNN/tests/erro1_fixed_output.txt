@@ -1,0 +1,16 @@
+Fetching data
+Fetched and indexed data
+Vectorized data
+Training for 1 epochs
+Training started for epoch 1
+  0%|                                                                                                                                             | 0/1000 [00:00<?, ?it/s]/Users/zhaoyangmengyuan/Documents/GitHub/CS5740NLP/P3-FFNN-RNN/ffnn1fixed.py:35: UserWarning: Implicit dimension choice for log_softmax has been deprecated. Change the call to include dim=X as an argument.
+  predicted_vector = self.softmax(self.activation(z2))
+100%|██████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 1000/1000 [03:55<00:00,  4.25it/s]
+Training completed for epoch 1
+Training accuracy for epoch 1: 0.4154375
+Training time for this epoch: 235.48719906806946
+Validation started for epoch 1
+100%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 100/100 [00:02<00:00, 35.72it/s]
+Validation completed for epoch 1
+Validation accuracy for epoch 1: 0.4875
+Validation time for this epoch: 2.8050010204315186

@@ -20,7 +20,7 @@ class FFNN(nn.Module):
 			self.h = h
 			self.W1 = nn.Linear(input_dim, h)
 			self.activation = nn.ReLU() # The rectified linear unit; one valid choice of activation function
-			self.W2 = nn.Linear(h, h)
+			self.W2 = nn.Linear(h, 5)
 			# The below two lines are not a source for an error
 			self.softmax = nn.LogSoftmax() # The softmax function that converts vectors into probability distributions; computes log probabilities for computational benefits
 			self.loss = nn.NLLLoss() # The cross-entropy/negative log likelihood loss taught in class
@@ -97,35 +97,45 @@ def main(hidden_dim, number_of_epochs):
 		start_time = time.time()
 		print("Training started for epoch {}".format(epoch + 1))
 		random.shuffle(train_data) # Good practice to shuffle order of training data
-		minibatch_size = 16 
+		minibatch_size = 16
 		N = len(train_data) 
 		for minibatch_index in tqdm(range(N // minibatch_size)):
+			# Intialize the hidden weight to all zeros
 			optimizer.zero_grad()
 			loss = None
 			for example_index in range(minibatch_size):
 				input_vector, gold_label = train_data[minibatch_index * minibatch_size + example_index]
+				# Forward pass: compute the output class given an input vector
 				predicted_vector = model(input_vector)
 				predicted_label = torch.argmax(predicted_vector)
 				correct += int(predicted_label == gold_label)
 				total += 1
+				# Compute the loss: difference between the output class and the pre-given label
+				#print(minibatch_index,'\n predicted vector', predicted_vector, '\n predicted_label', predicted_label, '\n golden label', gold_label)
 				example_loss = model.compute_Loss(predicted_vector.view(1,-1), torch.tensor([gold_label]))
 				if loss is None:
 					loss = example_loss
 				else:
 					loss += example_loss
+			# Backward pass: compute the weight
 			loss = loss / minibatch_size
 			loss.backward()
+			# Optimizer: update the weights of hidden nodes
 			optimizer.step()
 		print("Training completed for epoch {}".format(epoch + 1))
 		print("Training accuracy for epoch {}: {}".format(epoch + 1, correct / total))
 		print("Training time for this epoch: {}".format(time.time() - start_time))
+
+
 		# loss = None
 		correct = 0
 		total = 0
 		start_time = time.time()
+		# Set the model to evaluation mode
+		model.train(False) 
 		print("Validation started for epoch {}".format(epoch + 1))
 		random.shuffle(valid_data) # Good practice to shuffle order of validation data
-		minibatch_size = 16 
+		minibatch_size = 16
 		N = len(valid_data) 
 		for minibatch_index in tqdm(range(N // minibatch_size)):
 			# optimizer.zero_grad()
