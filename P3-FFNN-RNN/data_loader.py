@@ -7,7 +7,7 @@ def fetch_data():
 	with open('validation.json') as valid_f:
 		validation = json.load(valid_f)
 	# If needed you can shrink the training and validation data to speed up somethings but this isn't always safe to do by setting k < 16000
-	k = 1600
+	k = 10
 	random.shuffle(training)
 	random.shuffle(validation)
 	training, validation = training[:k], validation[:k]

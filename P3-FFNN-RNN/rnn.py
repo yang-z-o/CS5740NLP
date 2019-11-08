@@ -18,30 +18,34 @@ class RNN(nn.Module):
 		super(RNN, self).__init__()
 		self.hidden_size = hidden_size
 		self.embeds = nn.Embedding(vocab_size, input_size)
-		self.i2h = nn.Linear(input_size + hidden_size, hidden_size)
+
+		self.i2h = nn.Linear(input_size, hidden_size)
+		self.rnn = nn.LSTM(hidden_size, hidden_size)
 		self.h2o = nn.Linear(hidden_size, output_size)
-		self.softmax = nn.LogSoftmax()
+
+		self.softmax = nn.LogSoftmax(dim=1)
 		self.loss = nn.NLLLoss()
 
 	def compute_Loss(self, predicted_vector, gold_label):
 		return self.loss(predicted_vector, gold_label)	
 
 	def step(self, input, last_hidden):
-		embed = self.embeds(torch.tensor([input], dtype=torch.long))
-		input = torch.cat((embed, last_hidden), 1)
-		hidden = self.i2h(input)
-		output = self.h2o(hidden)
+		input = self.embeds(torch.tensor([input], dtype=torch.long))
+		hidden = self.i2h(input.view(1, -1)).unsqueeze(1)
+		output, hidden = self.rnn(hidden, last_hidden)
+		output = self.h2o(output.squeeze(1))
 		return hidden, output
 
 	def forward(self, inputs): 
-		last_hidden = torch.tensor(np.zeros(self.hidden_size).reshape(1,-1), dtype=torch.float)
+		#last_hidden = torch.tensor(np.zeros(self.hidden_size).reshape(1,-1), dtype=torch.float)
+		last_hidden = None
 		for input in inputs:
 			last_hidden, output = self.step(input, last_hidden)
 		predicted_vector = self.softmax(output)
 		return predicted_vector
 
 
-def main(input_size, hidden_size):
+def main(input_size, hidden_size, number_of_epochs):
 	train_data, valid_data = fetch_data() 
 
 	# data pre-processing 
@@ -55,30 +59,32 @@ def main(input_size, hidden_size):
 
 	model = RNN(len(vocab), input_size, hidden_size, 5)
 	optimizer = optim.SGD(model.parameters(), lr=0.01, momentum=0.9) 
-	model.train()
-
-	correct, total = 0, 0
-	for document, gold_label in train_data:
-		optimizer.zero_grad()
-		input_vector = [word_to_idx[word] for word in document]
-		predicted_vector = model(input_vector)
-		predicted_label = torch.argmax(predicted_vector)
-		correct += int(predicted_label == gold_label)
-		total += 1
-		#print(predicted_vector, predicted_label, gold_label)
-		loss = model.compute_Loss(predicted_vector.view(1,-1), torch.tensor([gold_label]))
-		loss.backward()
-		optimizer.step()
 	
-	print("Training accuracy: {}".format(correct / total))
+	for epoch in range(number_of_epochs):
+		print("Training for {} epochs".format(epoch))
+		model.train()
+		correct, total = 0, 0
+		for document, gold_label in train_data:
+			optimizer.zero_grad()
+			input_vector = [word_to_idx[word] for word in document]
+			predicted_vector = model(input_vector)
+			predicted_label = torch.argmax(predicted_vector)
+			correct += int(predicted_label == gold_label)
+			total += 1
+			#print(predicted_vector, predicted_label, gold_label)
+			loss = model.compute_Loss(predicted_vector.view(1,-1), torch.tensor([gold_label]))
+			loss.backward()
+			optimizer.step()
+		
+		print("Training accuracy: {}".format(correct / total))
 
-	# Set the model to evaluation mode
-	model.train(False) 
-	correct, total = 0, 0
-	for document, gold_label in valid_data:
-		input_vector = [word_to_idx.get(word,word_to_idx['unk']) for word in document]
-		predicted_vector = model(input_vector)
-		predicted_label = torch.argmax(predicted_vector)
-		correct += int(predicted_label == gold_label)
-		total += 1
-	print("Validation accuracy: {}".format(correct / total))
+		# Set the model to evaluation mode
+		model.train(False) 
+		correct, total = 0, 0
+		for document, gold_label in valid_data:
+			input_vector = [word_to_idx.get(word,word_to_idx['unk']) for word in document]
+			predicted_vector = model(input_vector)
+			predicted_label = torch.argmax(predicted_vector)
+			correct += int(predicted_label == gold_label)
+			total += 1
+		print("Validation accuracy: {}".format(correct / total))
