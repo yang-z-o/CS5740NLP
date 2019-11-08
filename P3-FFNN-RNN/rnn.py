@@ -13,7 +13,6 @@ from data_loader import fetch_data
 
 unk = '<UNK>'
 
-
 class RNN(nn.Module):
 	def __init__(self, vocab_size, input_size, hidden_size, output_size): # Add relevant parameters
 		super(RNN, self).__init__()
