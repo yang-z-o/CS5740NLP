@@ -15,15 +15,12 @@ from data_loader import fetch_data
 unk = '<UNK>'
 
 class RNN(nn.Module):
-	def __init__(self, vocab_size, input_size, hidden_size, output_size):
+	def __init__(self, vocab_size, input_size, hidden_size, output_size): # Add relevant parameters
 		super(RNN, self).__init__()
 		self.hidden_size = hidden_size
 		self.embeds = nn.Embedding(vocab_size, input_size)
-
-		self.i2h = nn.Linear(input_size, hidden_size)
-		self.rnn = nn.GRU(hidden_size, hidden_size)
+		self.i2h = nn.Linear(input_size + hidden_size, hidden_size)
 		self.h2o = nn.Linear(hidden_size, output_size)
-
 		self.softmax = nn.LogSoftmax(dim=1)
 		self.loss = nn.NLLLoss()
 
@@ -31,22 +28,21 @@ class RNN(nn.Module):
 		return self.loss(predicted_vector, gold_label)	
 
 	def step(self, input, last_hidden):
-		input = self.embeds(torch.tensor([input], dtype=torch.long))
-		hidden = self.i2h(input.view(1, -1)).unsqueeze(1)
-		output, hidden = self.rnn(hidden, last_hidden)
-		output = self.h2o(output.squeeze(1))
-		# output = self.h2o(hidden)
+		embed = self.embeds(torch.tensor([input], dtype=torch.long))
+		input = torch.cat((embed, last_hidden), 1)
+		hidden = self.i2h(input)
+		output = self.h2o(hidden)
 		return hidden, output
 
 	def forward(self, inputs): 
-		last_hidden = None
+		last_hidden = torch.tensor(np.zeros(self.hidden_size).reshape(1,-1), dtype=torch.float)
 		for input in inputs:
 			last_hidden, output = self.step(input, last_hidden)
 		predicted_vector = self.softmax(output)
 		return predicted_vector
 
-
-def main(input_size, hidden_size, number_of_epochs):
+def main(input_size, hidden_size, number_of_epochs, minibatch_size):
+	print('Hidden Diementionality is {}\n Batch size is {}'.format(hidden_size, minibatch_size))
 	train_data, valid_data = fetch_data() 
 
 	# data pre-processing 
@@ -56,10 +52,9 @@ def main(input_size, hidden_size, number_of_epochs):
 		sub_vocab = set(document)
 		vocab = vocab.union(sub_vocab)
 	vocab.add('unk')
-	
 	word_to_idx = {word: i for i, word in enumerate(vocab)}
-	model = torch.load('rnn_model.pkl')
-	#model = RNN(len(vocab), input_size, hidden_size, 5)
+
+	model = RNN(len(vocab), input_size, hidden_size, 5)
 	optimizer = optim.SGD(model.parameters(), lr=0.01, momentum=0.9) 
 	
 	for epoch in range(number_of_epochs):
@@ -70,7 +65,6 @@ def main(input_size, hidden_size, number_of_epochs):
 		loss = None
 		correct, total = 0, 0
 		random.shuffle(train_data)
-		minibatch_size = 16
 		N = len(train_data) 
 		for minibatch_index in tqdm(range(N // minibatch_size)):
 			optimizer.zero_grad()
@@ -90,8 +84,6 @@ def main(input_size, hidden_size, number_of_epochs):
 			loss = loss / minibatch_size
 			loss.backward()
 			optimizer.step()
-			#torch.save(model, 'rnn_model.pkl')
-		
 		print("Training accuracy: {}".format(correct / total))
 		print("Training time for this epoch: {}".format(time.time() - start_time))
 

@@ -75,7 +75,8 @@ def convert_to_vector_representation(data, word2index):
 	return vectorized_data
 
 
-def main(hidden_dim, number_of_epochs):
+def main(hidden_dim, number_of_epochs, minibatch_size):
+	print('Hidden Diementionality is {}\n Batch size is {}'.format(hidden_dim, minibatch_size))
 	print("Fetching data")
 	train_data, valid_data = fetch_data() # X_data is a list of pairs (document, y); y in {0,1,2,3,4}
 	vocab = make_vocab(train_data)
@@ -86,78 +87,58 @@ def main(hidden_dim, number_of_epochs):
 	print("Vectorized data")
 
 	model = FFNN(input_dim = len(vocab), h = hidden_dim)
-	print(len(vocab), hidden_dim)
-	for param in model.parameters():
-		print(param.size(),param)
-	# optimizer = optim.SGD(model.parameters(),lr=0.01, momentum=0.9)
-	# print("Training for {} epochs".format(number_of_epochs))
-	# for epoch in range(number_of_epochs):
-	# 	model.train()
-	# 	optimizer.zero_grad()
-	# 	loss = None
-	# 	correct = 0
-	# 	total = 0
-	# 	start_time = time.time()
-	# 	print("Training started for epoch {}".format(epoch + 1))
-	# 	random.shuffle(train_data) # Good practice to shuffle order of training data
-	# 	minibatch_size = 16
-	# 	N = len(train_data) 
-	# 	for minibatch_index in tqdm(range(N // minibatch_size)):
-	# 		# Intialize the hidden weight to all zeros
-	# 		optimizer.zero_grad()
-	# 		loss = None
-	# 		for example_index in range(minibatch_size):
-	# 			input_vector, gold_label = train_data[minibatch_index * minibatch_size + example_index]
-	# 			# Forward pass: compute the output class given an input vector
-	# 			predicted_vector = model(input_vector)
-	# 			predicted_label = torch.argmax(predicted_vector)
-	# 			correct += int(predicted_label == gold_label)
-	# 			total += 1
-	# 			# Compute the loss: difference between the output class and the pre-given label
-	# 			#print(minibatch_index,'\n predicted vector', predicted_vector, '\n predicted_label', predicted_label, '\n golden label', gold_label)
-	# 			example_loss = model.compute_Loss(predicted_vector.view(1,-1), torch.tensor([gold_label]))
-	# 			if loss is None:
-	# 				loss = example_loss
-	# 			else:
-	# 				loss += example_loss
-	# 		# Backward pass: compute the weight
-	# 		loss = loss / minibatch_size
-	# 		loss.backward()
-	# 		# Optimizer: update the weights of hidden nodes
-	# 		optimizer.step()
-	# 	print("Training completed for epoch {}".format(epoch + 1))
-	# 	print("Training accuracy for epoch {}: {}".format(epoch + 1, correct / total))
-	# 	print("Training time for this epoch: {}".format(time.time() - start_time))
+	optimizer = optim.SGD(model.parameters(),lr=0.01, momentum=0.9)
+	print("Training for {} epochs".format(number_of_epochs))
+	for epoch in range(number_of_epochs):
+		model.train()
+		optimizer.zero_grad()
+		loss = None
+		correct = 0
+		total = 0
+		start_time = time.time()
+		print("Training started for epoch {}".format(epoch + 1))
+		random.shuffle(train_data) # Good practice to shuffle order of training data
+		N = len(train_data) 
+		for minibatch_index in tqdm(range(N // minibatch_size)):
+			# Intialize the hidden weight to all zeros
+			optimizer.zero_grad()
+			loss = None
+			for example_index in range(minibatch_size):
+				input_vector, gold_label = train_data[minibatch_index * minibatch_size + example_index]
+				# Forward pass: compute the output class given an input vector
+				predicted_vector = model(input_vector)
+				predicted_label = torch.argmax(predicted_vector)
+				correct += int(predicted_label == gold_label)
+				total += 1
+				# Compute the loss: difference between the output class and the pre-given label
+				example_loss = model.compute_Loss(predicted_vector.view(1,-1), torch.tensor([gold_label]))
+				if loss is None:
+					loss = example_loss
+				else:
+					loss += example_loss
+			# Backward pass: compute the weight
+			loss = loss / minibatch_size
+			loss.backward()
+			# Optimizer: update the weights of hidden nodes
+			optimizer.step()
+		print("Training accuracy for epoch {}: {}".format(epoch + 1, correct / total))
+		print("Training time for this epoch: {}".format(time.time() - start_time))
 
-
-	# 	# loss = None
-	# 	correct = 0
-	# 	total = 0
-	# 	start_time = time.time()
-	# 	# Set the model to evaluation mode
-	# 	model.train(False) 
-	# 	print("Validation started for epoch {}".format(epoch + 1))
-	# 	random.shuffle(valid_data) # Good practice to shuffle order of validation data
-	# 	minibatch_size = 16
-	# 	N = len(valid_data) 
-	# 	for minibatch_index in tqdm(range(N // minibatch_size)):
-	# 		# optimizer.zero_grad()
-	# 		# loss = None
-	# 		for example_index in range(minibatch_size):
-	# 			input_vector, gold_label = valid_data[minibatch_index * minibatch_size + example_index]
-	# 			predicted_vector = model(input_vector)
-	# 			predicted_label = torch.argmax(predicted_vector)
-	# 			correct += int(predicted_label == gold_label)
-	# 			total += 1
-	# 		# 	example_loss = model.compute_Loss(predicted_vector.view(1,-1), torch.tensor([gold_label]))
-	# 		# 	if loss is None:
-	# 		# 		loss = example_loss
-	# 		# 	else:
-	# 		# 		loss += example_loss
-	# 		# loss = loss / minibatch_size
-	# 		# loss.backward()
-	# 		# optimizer.step()
-	# 	print("Validation completed for epoch {}".format(epoch + 1))
-	# 	print("Validation accuracy for epoch {}: {}".format(epoch + 1, correct / total))
-	# 	print("Validation time for this epoch: {}".format(time.time() - start_time))
+		correct = 0
+		total = 0
+		start_time = time.time()
+		# Set the model to evaluation mode
+		model.train(False) 
+		print("Validation started for epoch {}".format(epoch + 1))
+		random.shuffle(valid_data) # Good practice to shuffle order of validation data
+		minibatch_size = 16
+		N = len(valid_data) 
+		for i in range(N):
+			input_vector, gold_label = valid_data[i]
+			predicted_vector = model(input_vector)
+			predicted_label = torch.argmax(predicted_vector)
+			correct += int(predicted_label == gold_label)
+			total += 1
+		print("Validation accuracy for epoch {}: {}".format(epoch + 1, correct / total))
+		print("Validation time for this epoch: {}".format(time.time() - start_time))
 		
