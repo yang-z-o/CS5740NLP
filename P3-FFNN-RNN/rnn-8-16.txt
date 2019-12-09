@@ -1,0 +1,32 @@
+Hidden Diementionality is 8
+ Batch size is 16
+Training for 1 epochs
+Training accuracy: 0.19125
+Training time for this epoch: 245.1271617412567
+Validation started for epoch 1
+Validation accuracy: 0.25
+Validation time for this epoch: 1.2488110065460205
+Training for 2 epochs
+Training accuracy: 0.263125
+Training time for this epoch: 245.14791202545166
+Validation started for epoch 2
+Validation accuracy: 0.25625
+Validation time for this epoch: 1.4507989883422852
+Training for 3 epochs
+Training accuracy: 0.29375
+Training time for this epoch: 248.6982021331787
+Validation started for epoch 3
+Validation accuracy: 0.21875
+Validation time for this epoch: 1.2603797912597656
+Training for 4 epochs
+Training accuracy: 0.286875
+Training time for this epoch: 276.78993010520935
+Validation started for epoch 4
+Validation accuracy: 0.275
+Validation time for this epoch: 1.3835089206695557
+Training for 5 epochs
+Training accuracy: 0.304375
+Training time for this epoch: 291.2068428993225
+Validation started for epoch 5
+Validation accuracy: 0.25
+Validation time for this epoch: 1.3029232025146484
